@@ -1,0 +1,47 @@
+     1                                 %line 1+1 lots_of_vars.asm
+     2                                 [section .data]
+     3                                 
+     4                                 EXIT_SUCCESS equ 0
+     5                                 SYS_EXIT equ 60
+     6                                 
+     7 00000000 FF000000               bVar dd 255
+     8 00000004 FFFF0000               wVar dd 65535
+     9 00000008 00000000               aResult dd 0
+    10 0000000C FFFFFFFF00000000       dVar dq 4294967295
+    11 00000014 677FF36D00000000       dVar2 dq 1844674407
+    12 0000001C 0000000000000000       bResult dq 0
+    13                                 
+    14 00000024 48656C6C6F20           strng1 db "Hello "
+    15 0000002A 576F726C64             strng2 db "World"
+    16 0000002F 7BE7FF                 arrVar db 123, 231, 255
+    17 00000032 D00F4940               flt1 dd 3.14159
+    18 00000036 99369D10C1852040       flt2 dq 8.2612385932837234819
+    19                                 
+    20                                 [section .text]
+    21                                 [global _start]
+    22                                 _start:
+    23                                 
+    24                                 
+    25 00000000 8B0425[00000000]        mov eax, dWord [bVar]
+    26 00000007 030425[00000000]        add eax, dWord [wVar]
+    27 0000000E 890425[00000000]        mov dWord [aResult], eax
+    28                                 
+    29 00000015 488B1C25[00000000]      mov rbx, qWord [dVar]
+    30 0000001D 48031C25[00000000]      add rbx, qWord [dVar2]
+    31 00000025 48891C25[00000000]      mov qWord [bResult], rbx
+    32                                 
+    33 0000002D 8A0C25[00000000]        mov cl, byte [strng1]
+    34 00000034 020C25[00000000]        add cl, byte [strng2]
+    35 0000003B 880C25[00000000]        mov byte [cResult], cl
+    36                                 
+    37 00000042 BB64000000              mov ebx, 100
+    38 00000047 48C7C1FFFFFFFF          mov rcx, -1
+    39 0000004E 89D9                    mov ecx, ebx
+    40                                 
+    41 00000050 BA40420F00              mov edx, 1000000
+    42 00000055 66BA204E                mov dx, 20000
+    43                                 
+    44                                 last:
+    45 00000059 48C7C03C000000          mov rax, SYS_EXIT
+    46 00000060 48C7C700000000          mov rdi, EXIT_SUCCESS
+    47 00000067 0F05                    syscall

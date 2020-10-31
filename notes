@@ -1,0 +1,648 @@
+## 1 What is Assembly Language ##
+
+Complex Instruction Set Computation (CISC)
+  x86_64, for example
+Reduced ISC (RISC)
+  popular in tablets and smartphones
+
+basic instruction set
+processor registers
+memory addressing
+hardware interfacing
+IO
+
+tool chain, compiler or assembler, linker, loader, debugger
+
+function call frame | activation record
+stack-based arguments, preserved registers, stack-dynamic local variables
+
+IO buffering: no more magic!
+  interactive IO, file IO, associated os services
+
+multi-processing
+shared memory, threading
+race conditions
+
+interrupts
+fundamental mechanism of modern multi-user computers
+interrupt service handles, vector interrupts
+
+architecture and programming environment of Intel processors supporting IA-32 and Intel 64 architectures
+
+YASM open source assembler
+
+DDD open source debugger supporting assembly language
+
+## 2 Architecture Overview ##
+
+CPU
+Primary Storage - RAM
+Secondary Storage - Drive
+  Programs and data
+IO devices
+Bus
+
+program copied to primary storage for execution
+
+x86_64 data storage size elements
+byte, word, double-word, quadword, double quadword
+8 bits, 16 bits, 32 bits, 64 bits, 128 bits
+
+C/C++ declares vars in every size except double quadword
+char: byte, short: word, double: quadword (etc)
+
+processor, chip, die
+functional units
+  Arithmetic Logic Unit (ALU)
+  registers
+  cache memory
+
+CPU Registers
+working location in cpu, scratch pad, whiteboard
+16 general-purpose registers (GPR)
+access whole register or a subset of it's bits
+example
+  64-bit register, lowest 32 bits, lowest 16 bits, lowest 8 bits
+  rax, eax, ax, al
+  rbx, ebx, bx, bl
+  ...
+  rsp, esp, sp, spl
+  r8, r8d, r8w, r8b
+  ...
+  r15, r15d, r15w, r15b
+
+rest of register not changed when subregister set
+0000 000B A43B 7400 <-- set rax to 50 billion
+0000 000B A43B C350 <-- set ax to 50 thousand
+0000 000B A43B C332 <-- set al to 32
+... unless setting the 32-bit portion of the register
+  eax in this case
+
+
+RSP stack pointer register
+  current top of the stack
+RBP base pointer register
+  base pointer during function calls
+RIP instruction pointer register
+  points to next instruction to be executed
+
+rFlags flag register
+  status of cpu after last instruction
+  examples: Carry, Parity, Zero
+
+XMM registers for floating-point operations
+  128 bits, more recently 256 bits
+  and SIMD single instruction multiple data instructions
+    performance increase
+    examples: graphics, DSP
+  xmm0 - xmm15
+  SSE streaming SIMD extensions
+
+
+Cache Memory
+  subset of primary storage
+  located on die
+  subsequent access of same memory location gets value from cache
+    this is what a cache is
+  memory read typically involved sending address via bus to memory controller, which respond with value from memory location
+
+each core gets L1 cache
+cores share L2 cache
+sometimes L3 cache
+
+Main Memory
+  series of bytes
+  each byte has one address
+  little-endian
+    LSB least significant byte stored in lowest address
+  My guess as to why:
+    when storing a variable in little-endian,
+      if you count up from lowest byte in memory,
+      when you reach address you can pop bits off
+      (starting from lowest) value into each address
+      as you go, zippering value into memory
+
+Memory Layout (of program)
+from high memory to low memory
+  stack
+  ...
+  heap - dynamically allocated data
+  BSS - uninitialized data, declared vars no initial value
+  data - declared variables with initial value at assemble-time
+  text(code)
+  reserved
+
+generally price of memory proportional to speed
+  inversely proportional to physical size
+
+## 3 Data Representation ##
+
+signed and unsigned
+two's complement for negative
+  invert all 0s and 1s, and add 1
+  0011 3    0x03
+  1100 12   0x0C
+  1101 13   0x0D
+
+For a byte, it could have -16 to 15
+  -16 to -1 in the first 4 bits
+  0 to 15 in the second 4 bits
+  Try -13:
+  00001101  start with +13
+  11110010  negate
+  11110011  add 1
+  Try -1
+  00000001
+  11111110
+  11111111
+  Try -2
+  00000010
+  11111101
+  11111110
+  Try -3
+  00000011
+  11111100
+  11111101
+  Try -16
+  00010000
+  11101111
+  11110000
+  16 - 0 = 16, negative
+  -15
+  00001111
+  11110000
+  11110001
+  16 - 1 = 15, negative
+
+  Second nibble: (half the total values - this number) = the negative number
+  first nibble as the sign control
+  Why not do 1000 0000 ?
+  positive 2^7 -1 to negative 2^7 with a single sign bit?
+    Try -4
+    00000100
+    10000100 ?
+    What binary algorithm gets me there?
+    Hm.
+  
+Can add and subtract numbers of this scheme without issue
+13 + -5
+  00001101
++ 11111011 (16 - 5 = 11)
+ 100001000
+lost digit. ignored? result to its right is correct
+
+
+IEEE 32-bit floating-point standard
+
+A Word (32 bits)
+  1 bit     1 byte               23 bits
+  sign (s), biased exponent (E), fraction (F)
+sign: 0 positive; 1 negative
+
+N = (-1)^s * 1.F * 2^E-127
+
+Binary and fractional components
+2^-1 = 1/2
+2^-2 = 1/4
+etc
+
+100.101 in binary
+4.625 in decimal
+4 and 1/2 + 1/8 or .5 + .125 (wow!)
+
+binary normalized scientific notation
+100.101
+to
+1.00101 * 2^2
+
+biased exponent
+  exponent from normalized scientific notation plus the bias
+  bias is 127 in IEEE 754 32-bit floating-point standard
+  convert into byte and stored in E area of word
+
+final word of 4.625
+  1 2+127 .00101 left-justified ("mantissa")
+  1 10000001 00101 00 0000 0000 0000 0000
+to hex
+  1100 0000 1001 0100 0000 0000 0000 0000 
+    C    0    9    4    0    0    0    0
+    C094 0000
+
+anything that starts with a C or higher is negative
+  impossible to start with 8 through B
+  0100 lowest possible
+  1111 highest possible
+  1000 to 1011 not possible
+
+
+IEEE 754 64-bit Representation
+
+same as above with 11-bit biased exponent, bias is + or - 1023
+
+Not a Number (NaN)
+
+unrepresentable number
+integer treated as floating-point representation
+add or subtract result too large or small to be represented
+  (overflow or round to 0?)
+
+Characters and Strings
+
+numeric value for each symbol or character
+letters, numerical digits, punctuation, whitespace
+control characters (\r, \t...)
+
+American Standard Code for Information Interchange (ASCII)
+Unicode (UTF-8, 16, 32, etc)
+  unicode not considered in this text
+
+String Representation
+
+series of (ASCII) characters terminated with a null
+Hello
+72 101 108 108 111 0
+0x48 0x65 0x6C 0x6C 0x6F 0x0
+
+1.1 -8 to 7 <-- wrong, -128 to 127
+1.2 0 to 15 <-- wrong, 0 to 255
+  I think I was doing nibbles above...
+1.3 -65k to 65k <-- wrong, -32k to 32k
+1.4 0 to 65535
+1.5 -2m to 2m
+1.6 0 to 4m
+
+2.1 5
+2.2 9
+2.3 13
+2.4 21
+
+
+## 4 Program Format ##
+
+data section
+bss section
+text section
+
+; this is a comment
+hex 0x prefix
+octal q suffix
+
+radix means base as in number system
+
+constant <name> equ <value>
+SIZE equ 10000
+constants not assigned a memory location or specific type/size
+
+spaces matter
+
+Data section
+section .data
+
+initialized data declarations
+
+var names must start with a letter, can include numbers and some special characters
+<var name> <data type> <initial value>
+db dw dd dq ddq dt
+
+primary assembler directives for initialized data declarations
+there are other directives
+
+example var declarations
+section .data
+
+bVar      db      10            ; byte variable
+cVar      db      "H"           ; single character
+strng     db      "Hello World" ; string
+wVar      dw      5000          ; 16-bit variable
+dVar      dd      50000         ; 32-bit variable
+arr       dd      100, 200, 300 ; 3-element array
+flt1      dd      3.14259       ; 32-bit float
+qVar      dq      1000000000    ; 64-bit variable
+
+BSS section
+uninitialized data declarations
+byte arrays
+section .bss
+
+<variable name> <res type> <count>
+resbm resw resd resq resdq
+
+primary assembler directives for uninitialized data declarations
+there are other directives
+
+examples
+section .bss
+
+bArr      resb      10      ; 10-element byte array
+wArr      resw      50      ; 50-element word array
+dArr      resd      100     ; 100-element double array
+qArr      resq      200     ; 200-element quad array
+
+
+Text section
+section .text
+
+headers
+entry point
+system linker
+
+global _start
+_start:
+
+system service tells os when program is done and resources can be reclaimed
+
+Example program
+
+section      .data
+; -----
+; Define constants
+EXIT_SUCCESS      equ       0     ; successful operation
+SYS_exit          equ       60    ; call code for terminate
+; -----
+; Byte variable declarations
+bVar1             db        17
+bVar2             db        9
+bResult           db        0
+; -----
+; Word variable declarations
+wVar1             dw        17000
+wVar2             dw        9000
+wResult           dw        0
+; omitting some of the example program
+; it demonstrates how different sized registers will be needed for different sized operands
+
+section      .text
+global _start
+_start:
+
+; Basic addition
+; Byte example
+  mov     al, byte [bVar1]
+  add     al, byte [bVar2]
+  mov     byte [bResult], al
+; Word example
+  mov     ax, word [wVar1]
+  add     ax, word [wVar2]
+  mov     word [wResult], ax
+
+; Done, terminate program
+last:
+  mov     rax, SYS_exit         ; call code for exit
+  mov     rdi, EXIT_SUCCESS     ; exit program with success
+  syscall
+
+1. yasm
+2. ;
+3. data
+4. bss
+5. text
+6.1 bNum    db    10
+6.2 wNum    dw    10291
+6.3 dwNum   dd    2126010
+6.4 qwNum   dq    10000000000
+7.1 bArr    resb  100
+7.2 wArr    resw  3000
+7.3 dwArr   resd  200
+7.4 qArr    resq  5000
+8. global _start
+   _start:
+
+## 5 Tool Chain ##
+
+tools used to create a program
+assember, linker, loader, debugger
+
+          assembler      linker             loader
+source code -> object file -> executable file -> program in memory
+
+also: list file, library routine are linked
+shared object files may be loaded as well if needed during execution
+
+Assembler
+
+object file in machine language binary
+var names and labels converted into addresses
+
+yasm -g dwarf2 -f elf64 example.asm -l example.lst
+
+-g dwarf2 = include debugging info in object file
+-f elf64  = create object file in ELF64 format
+  64-bit linux systems
+-l example.lt = create list file of this name
+
+List file
+
+line number, relative address, machine language version of instruction, original source line
+map assembler to machine language
+useful when debugging
+
+label "last:" is not an instruction and has no machine language translation
+  used to reference a specific address
+
+Two-Pass Assembler
+
+1:1 assembly and machine language
+
+read source file twice to handle changes in control flow
+
+First pass
+
+create symbol table, expand macros, evaluate constant expressions
+
+macro expands into instructions
+constant expression composed of constants
+constants evaluate at assemble-time
+
+symbol table lists all program symbols, var names, and labels, and their addresses in program
+
+assembler directives
+
+Second pass
+
+generate code, create list file, create object file
+
+some code generated in first pass
+all this varies by assembler design
+uses addresses in symbol table (??)
+
+Assembler directives
+tell assembler what to do as it works, not used by cpu in program being assembled
+
+Linker
+
+aka linkage editor
+link one or more object files into executable
+
+routines
+
+GNU gold linker "ld"
+
+ld -g -o example example.o
+
+-g for debugging
+-o name file  ; a.out by default
+
+ld -g example main.o funcs.o
+
+declare functions not in source file with "extern"
+extern for vars too but typically use function args to pass data
+
+user or system library routines
+
+mark external func in list file with R (relocatable address)
+call fnc1 becomes call 0x0400
+
+Dynamic Linking
+
+as opposed to static linking
+Linux supports
+
+resolve symbols at runtime
+avoid duplicating popular libraries in every binary
+prevent need to recompile common standard libraries to fix all programs that use them if a bug is found
+
+incompatible update could be forced onto dynamically linked programs
+certification of program in package falls into doubt
+
+.so shared object on Linux
+.dll dynamically-linked library on Windows
+
+any speed difference?
+maybe linked at startup, not just as needed during execution?
+
+Assemble/Link script
+
+use bash to avoid running yasm and ld every time
+asm64.sh
+
+Loader
+
+get program from secondary storage
+create a new process
+load code into memory
+mark program ready to execute
+  os scheduler next
+
+Debugger
+
+GNU DDD debugger
+gdb
+
+assemble and link commands must include -g option
+
+1. asm and machine lang are 1:1 map of each other
+2. symbol table instructions to (relative) addresses; macros and constants
+3. generate code, create list file, object file
+4. combine object files into executable, sometimes at runtime
+  turn symbol table addresses into real addresses & consider all object files
+5. pull program from storage into memory, create process, mark for execution
+6. BUFF+5 where BUFF is a constant value
+7. assembly language -> object files -> executable
+8. shared object linked at execution time
+9. values and addresses <-- wrong, symbol names and symbol addresses
+
+
+## 6 DDD Debugger ##
+
+Data Display Debugger
+  visual for GNU Debugger (GDB)
+    plugins extend
+
+ddd example
+
+registers show hex and decimal
+right hand decimal display is always unsigned
+  char data not meaningful as int
+  signed ints will be "incorrect"
+    -17 shows as 239, 0xef
+
+rbp and rsp both hex, because storing addresses
+
+break at address?
+continue <n>
+F3
+where
+x/<n><f><u> $rsp
+x/<n><f><u> &<var>
+n - number of locations to display
+f - format; d, x, u, c, s, f for dec(signed), hex, dec(unsigned) char, str, float
+u - unit; b, h, w, g for byte(8), halfword(16), word (32), giant (64)
+
+
+see debugger commands file debugger_commands.txt
+
+
+Debugger Commands File (non-interactive)
+(gdb) source gdbIn.txt
+gdb <gdbIn.txt prog
+
+debugger "h" is 16-bits
+assembly language "word" means 16-bits
+
+11.1 x/db &bVar1
+11.2 x/dw &wVar1 <-- wrong, x/dh
+11.3 x/dg &dVar1 <-- wrong, x/dw
+11.4 x/dg &qVar1
+11.5 x/db &bArr1 <-- x/30db
+11.6 x/dw &wArr1 <-- x/50dh
+11.7 x/dg &dArr1 <-- x/75dw
+
+12.1 x/xb &bVar1
+12.2 x/xh &wVar1
+12.3 x/xw &dVar1
+12.4 x/xg &qVar1
+12.5 x/xb &bArr1 <-- x/30xb
+12.6 x/50xh &wArr1
+Translation: "Give me the values for 50 memory locations starting at the address nicknamed &wArr1 each 1 halfword/word (16-bits) apart"
+12.7 x/xg &dArr1 <-- x/75xw (32-bit)
+
+13 x/ $rsp <-- x/ug $rsp
+Stack contains 64-bit unsigned elements
+Access rsp register by name, it is not a variable, so not preceded by &
+$ seems to be resolving the pointer to its value
+14 x/5 $rsp <-- x/5ug $rsp
+
+"x/50dh"
+  # of elements
+  data format
+  stride length
+  x/ means read
+  &var is the pointer to the starting location in memory
+
+  &var is the location of the variable named var
+  does C even have variables with values that are not pointers?
+    Yeah you can have straight variables passed by value in C
+
+Assembly language -- passing by reference only?
+
+
+## 5 Instruction Set Overview ##
+
+data movement, conversion, arithmetic, logical, control
+function call instructions have their own chapter (12)
+
+operands - table on page 84
+register operand [size requirement]
+destination operand has contents overwritten with new result
+floating-point destination register operand
+source operand
+immediate value (base-10 by default, 0x<val> for hex)
+memory location
+operand, register, or memory
+op, reg, or mem with specific size
+program label
+
+Variables => RAM
+Operands => Registers
+"data is moved from memory into registers to be operated upon"
+and put back from register to variable after (so a variable is a location in RAM)
+
+Data Movement
+
+mov <dest>, <src>
+destination cannot be memory
+memory to memory requires 2 operations
+
+moving double-word register's value into another dd reg resets upper-order bits of the destination register to 0's
+
+

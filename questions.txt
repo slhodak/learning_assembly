@@ -1,0 +1,14 @@
+Is a word 16-bits or 32-bits!!!
+Text contradicts itself
+Also so does internet
+
+Page 51: declaring Word (16-bit) variables in the example program
+Page 77: DDD debugger <u> unit size halfword (16-bits), word (32-bits)
+  Word is 16-bits, debugger has the funny naming
+  This is the rule
+
+Gah!
+
+
+Why even say what data size? Why not just say which register and let it be implied?
+

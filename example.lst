@@ -1,0 +1,38 @@
+     1                                 %line 1+1 example.asm
+     2                                 [section .data]
+     3                                 
+     4                                 
+     5                                 EXIT_SUCCESS equ 0
+     6                                 SYS_exit equ 60
+     7                                 
+     8                                 
+     9 00000000 EF                     bVar1 db -17
+    10 00000001 F7                     bVar2 db -9
+    11 00000002 00                     bResult db 0
+    12                                 
+    13                                 
+    14 00000003 6842                   wVar1 dw 17000
+    15 00000005 2823                   wVar2 dw 9000
+    16 00000007 0000                   wResult dw 0
+    17                                 
+    18                                 
+    19                                 
+    20                                 [section .text]
+    21                                 [global _start]
+    22                                 _start:
+    23                                 
+    24                                 
+    25                                 
+    26 00000000 8A0425[00000000]        mov al, byte [bVar1]
+    27 00000007 020425[00000000]        add al, byte [bVar2]
+    28 0000000E 880425[00000000]        mov byte [bResult], al
+    29                                 
+    30 00000015 668B0425[00000000]      mov ax, word [wVar1]
+    31 0000001D 66030425[00000000]      add ax, word [wVar2]
+    32 00000025 66890425[00000000]      mov word [wResult], ax
+    33                                 
+    34                                 
+    35                                 last:
+    36 0000002D 48C7C03C000000          mov rax, SYS_exit
+    37 00000034 48C7C700000000          mov rdi, EXIT_SUCCESS
+    38 0000003B 0F05                    syscall
