@@ -12,3 +12,18 @@ Gah!
 
 Why even say what data size? Why not just say which register and let it be implied?
 
+
+Why did ld -g not work on my mac?
+
+Why is -f elf64 "not appropriate" for my mac?
+  elf64 - specific to instruction set, cpu architecture, or operating system?
+  64-bit operating system is a) different operating system for b) a different cpu architecture
+  cpu architecture interchangeable with instruction set here?
+  ELF refers to a kernel's "executable format"
+
+https://en.wikipedia.org/wiki/Comparison_of_operating_system_kernels
+
+Is an OS kernel written for a specific microarchitecture or instruction set?
+  Must be specific to an instruction set.
+
+Mach-O

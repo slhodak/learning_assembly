@@ -1,0 +1,37 @@
+     1                                 %line 1+1 maths.asm
+     2                                 [section .data]
+     3                                 
+     4                                 EXIT_SUCCESS equ 0
+     5                                 SYS_EXIT equ 60
+     6                                 
+     7 00000000 03                     bNumA db 3
+     8 00000001 05                     bNumB db 5
+     9 00000002 0000                   wAns1 dw 0
+    10 00000004 00                     bAns db 0
+    11 00000005 E803                   wNumA dw 1000
+    12 00000007 D007                   wNumB dw 2000
+    13 00000009 B80B                   wNumC dw 3000
+    14 0000000B 0000                   wAns2 dw 0
+    15                                 
+    16                                 [section .text]
+    17                                 [global _start]
+    18                                 _start:
+    19                                 
+    20 00000000 8A0425[00000000]        mov al, byte [bNumA]
+    21 00000007 F62425[00000000]        mul byte [bNumB]
+    22 0000000E 66890425[00000000]      mov word [wAns1], ax
+    23                                 
+    24 00000016 8A0425[00000000]        mov al, byte [bNumA]
+    25 0000001D FEC0                    inc al
+    26 0000001F 020425[00000000]        add al, byte [bNumB]
+    27 00000026 880425[00000000]        mov byte [bAns], al
+    28                                 
+    29 0000002D 668B1C25[00000000]      mov bx, word [wNumA]
+    30 00000035 66031C25[00000000]      add bx, word [wNumB]
+    31 0000003D 66031C25[00000000]      add bx, word [wNumC]
+    32 00000045 66891C25[00000000]      mov word [wAns2], bx
+    33                                 
+    34                                 last:
+    35 0000004D 48C7C23C000000          mov rdx, SYS_EXIT
+    36 00000054 48C7C700000000          mov rdi, EXIT_SUCCESS
+    37 0000005B 0F05                    syscall

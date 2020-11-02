@@ -3,11 +3,11 @@ section       .data
 EXIT_SUCCESS  equ     0
 SYS_EXIT      equ     60
 
-bVar          dd      255
-wVar          dd      65535
+dVar1         dd      255
+dVar1         dd      65535
 aResult       dd      0 ; do you need these empty registers after the ones you'll add?
-dVar          dq      4294967295
-dVar2         dq      1844674407
+qVar1         dq      4294967295
+qVar2         dq      1844674407
 bResult       dq      0
 
 strng1        db      "Hello "
@@ -22,12 +22,12 @@ global _start
 _start:
 
   ; Add byte to largest word, require double-word space
-  mov     eax, dWord [bVar]
-  add     eax, dWord [wVar]
+  mov     eax, dWord [dVar1]
+  add     eax, dWord [dVar2]
   mov     dWord [aResult], eax
   ; Add double-word to largest double-word, require quadword space
-  mov     rbx, qWord [dVar]
-  add     rbx, qWord [dVar2]
+  mov     rbx, qWord [qVar1]
+  add     rbx, qWord [qVar2]
   mov     qWord [bResult], rbx
   ; Add strings together
   mov     cl, byte [strng1]

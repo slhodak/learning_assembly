@@ -645,4 +645,70 @@ memory to memory requires 2 operations
 
 moving double-word register's value into another dd reg resets upper-order bits of the destination register to 0's
 
+Addresses and Values
+
+sometimes you want the address, not the value
+
+mov   rax, qword [var1]     ; value of var1 in rax
+mov   rax, var1             ; address of var1 in rax
+
+lea - load effective address
+
+lea   <reg64>, <mem>        ; place address of <mem> into reg64
+lea   rsi, dword [dVar]
+
+Conversion Instructions
+
+narrowing - no special instructions
+  mov   rax, 50
+  mov   byte [bVal], al
+widening
+  unsigned (see page 89)
+    set upper-order bits to 0
+    mov     al, 50
+    mov     rbx, 0
+    mov     bl, al
+    or
+    movzx   <dest>, <src>
+      does not allow quadword destination register with double-word source, nor it is needed. dw src to qw reg always 0s upper-order
+      immediate values not allowed
+  signed
+    sign-extend - extent 1 or 0 from upper-order bit to whole new upper-order word (i.e. bit 15 to bits 16-31)
+    A register to D register for signed conversion
+    cwd - signed in ax to dw in dx
+      dx:ax
+    movsx - general form
+    movsxd - allow a quadword dest operand and dw source operand
+
+Integer Arithmetic Instructions
+
+add <dest>, <src>
+  result overwrites dest
+  dest cannot be immediate
+  dest must be in register, src can be in memory
+inc - increment
+
+add with carry
+
+sub
+
+dec - decrement
+
+multiplication
+mul - unsigned
+
+operands must be same size
+double-sized result
+single-operand: use A register
+result lands across A and D registers
+allows quadword to have double-quadword result in adx and rdx registers
+  rdx:rax
+  pattern holds with smaller sizes--must be simpler (and faster) to do them all the same way, and largest version set the style?
+
+
+imul - signed
+
+Logical Instructions
+
+
 
