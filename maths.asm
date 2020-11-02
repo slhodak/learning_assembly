@@ -31,6 +31,6 @@ _start:
   mov     word [wAns2], bx
 
 last:
-  mov     rdx, SYS_EXIT
+  mov     rax, SYS_EXIT
   mov     rdi, EXIT_SUCCESS
   syscall
