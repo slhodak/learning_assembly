@@ -2,7 +2,7 @@ section      .data
 ; -----
 ; Define constants
 EXIT_SUCCESS      equ       0     ; successful operation
-SYS_exit          equ       60    ; call code for terminate
+SYS_EXIT          equ       60    ; call code for terminate
 ; -----
 ; Byte variable declarations
 bVar1             db        -17
@@ -32,6 +32,6 @@ _start:
 
 ; Done, terminate program
 last:
-  mov     rax, SYS_exit         ; call code for exit
+  mov     rax, SYS_EXIT         ; call code for exit
   mov     rdi, EXIT_SUCCESS     ; exit program with success
   syscall

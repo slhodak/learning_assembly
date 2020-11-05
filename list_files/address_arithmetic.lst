@@ -1,0 +1,33 @@
+     1                                 %line 1+1 assembly/address_arithmetic.asm
+     2                                 [section .data]
+     3                                 
+     4                                 SYS_EXIT equ 60
+     5                                 EXIT_SUCCESS equ 0
+     6                                 
+     7 00000000 00                     b1 db 0
+     8 00000001 0000                   w1 dw 0
+     9 00000003 00000000               d1 dd 0
+    10 00000007 0000000000000000       q1 dq 0
+    11 0000000F 000000000000000000-    dq1 ddq 0
+    12 0000000F 00000000000000     
+    13                                 
+    14                                 [section .text]
+    15                                 [global _start]
+    16                                 _start:
+    17                                 
+    18 00000000 B064                    mov al, 100
+    19 00000002 880425[00000000]        mov byte [b1], al
+    20 00000009 C60425[00000000]00      mov byte [b1], 0
+    21                                 
+    22 00000011 66C70425[00000000]-     mov word [w1], 1000
+    23 00000011 E803               
+    24                                 
+    25 0000001B 8A0425[01000000]        mov al, byte [w1+1]
+    26                                 
+    27 00000022 66BBCDAB                mov bx, 0xabcd
+    28 00000026 881C25[01000000]        mov byte [w1+1], bl
+    29                                 
+    30                                 last:
+    31 0000002D 48C7C03C000000          mov rax, SYS_EXIT
+    32 00000034 48C7C700000000          mov rdi, EXIT_SUCCESS
+    33 0000003B 0F05                    syscall

@@ -22,20 +22,27 @@ qNumF         dq    1000000
 ; Empty Vars
 dNumA         dd    0
 qNumA         dq    0
+dNumB         dd    -9000
+wNumE         dw    0
 
 section       .text
 global _start
 _start:
 
   ; Operations
-  mov         ax, -100
+  ; Narrowing
+  mov         ax, -100 ; Signed
   mov         byte [bNum3], al
-  mov         ax, word [wNumC]
+  ; bNum3 = -100
+  mov         ax, word [wNumC] ; Unsigned
   mov         byte [bNumC], al
-  ; bNumC = 100
+  ; bNumC = 200
   mov         rbx, qWord [qNumD]
-  mov         word [wNumD], bx
+  mov         word [wNumD], bx ; Unsigned
   ; wNumD = 40000
+  mov         r8d, dWord [dNumB] ; Signed
+  mov         word [wNumE], r8w
+  ; wNumE = -9000
   ; ## Unsigned Widening ##
   ; Widening memory
   mov         rdx, 1000000

@@ -399,7 +399,7 @@ last:
 6.1 bNum    db    10
 6.2 wNum    dw    10291
 6.3 dwNum   dd    2126010
-6.4 qwNum   dq    10000000000
+6.4 dqNum   dq    10000000000
 7.1 bArr    resb  100
 7.2 wArr    resw  3000
 7.3 dwArr   resd  200
@@ -670,15 +670,46 @@ widening
     mov     bl, al
     or
     movzx   <dest>, <src>
-      does not allow quadword destination register with double-word source, nor it is needed. dw src to qw reg always 0s upper-order
+      does not allow quadword destination register with double-word source, nor it is needed. dw src to dq reg always 0s upper-order
       immediate values not allowed
   signed
     sign-extend - extent 1 or 0 from upper-order bit to whole new upper-order word (i.e. bit 15 to bits 16-31)
     A register to D register for signed conversion
-    cwd - signed in ax to dw in dx
-      dx:ax
+    cwd - signed in ax to dw in dx:ax
+    cwde - signed in ax to dw in eax
+      see also: cdq and cdqe (same thing but for dw to dq)
+    cqo - dq to ddq (rax to rdx:rax)
     movsx - general form
     movsxd - allow a quadword dest operand and dw source operand
+
+** Sidenote on two's complement **
+Put a -8 into al. It's 0xf8, or 248
+Why?
+Because it's the two's complement of 8 for the given size (byte)
+8 is 1000, but in a byte it's 0000 1000
+2's comp goes like:           1111 0111
+              plus one:       1111 1000
+              which equals:   0xf8 or 248
+Notice that 248 is the # of byte values - abs value of our number
+  256 - abs(-8)
+  Not 255, the maximum unsigned value for a byte
+Cool, but why is it fair to take the 256 instead of 255?
+  Why should the processor use it for signed integers?
+    This question may be answered with more practice
+  Why should 2's complement be expressable as tot_values - abs(num)?
+    Well it's a bit like counting backwards from the top
+      256 would be 0, 255: 1, 254: 2, 253: 3, 252: 4, 251: 5, 250: 6
+        249: 7, 248: 8
+        Fair to use 256, which is "off the edge" as 1 0000 0000
+          0 is also kind of "off the edge" in that it require no pos bits
+            0000 0000 in the byte, no positive bits. Counting begins with 1s
+          if you were to express -1, it would be 255. -0? It's the same as 0.
+          So you don't need a -0. You can use regular 0. You get one extra positive value with signed ints than neg ones. Becuase 0 is shared.
+          -128 to 127
+          255 - 128 = 100 + 30 + -3 = 127
+          So 128 to 255 are values 1 to 128 (backwards)
+          And 0 to 128 are 0 to 127
+
 
 Integer Arithmetic Instructions
 
@@ -689,6 +720,16 @@ add <dest>, <src>
 inc - increment
 
 add with carry
+carry bit goes in rFlag register
+this is for overflowing machine register size (64-bit in our case)
+128-bit variable (ddq) stored in rax:rdx
+128-bit variable is stored in memory as 16 contiguous bytes
+
+addition without carry
+MSQ 504...704
+with carry
+MSQ 503...704
+  Maybe my example numbers don't overflow the LSQ?
 
 sub
 
@@ -703,8 +744,7 @@ single-operand: use A register
 result lands across A and D registers
 allows quadword to have double-quadword result in adx and rdx registers
   rdx:rax
-  pattern holds with smaller sizes--must be simpler (and faster) to do them all the same way, and largest version set the style?
-
+  pattern holds with smaller sizes--based on legacy method for backward compatibility
 
 imul - signed
 
