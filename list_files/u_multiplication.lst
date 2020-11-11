@@ -1,0 +1,46 @@
+     1                                 %line 1+1 assembly/u_multiplication.asm
+     2                                 [section .data]
+     3                                 
+     4                                 SYS_EXIT equ 60
+     5                                 EXIT_SUCCESS equ 0
+     6                                 
+     7 00000000 FF                     b1 db 255
+     8 00000001 64                     b2 db 100
+     9 00000002 0000                   wAns dw 0
+    10 00000004 50C3                   w1 dw 50000
+    11 00000006 204E                   w2 dw 20000
+    12 00000008 00000000               dAns dd 0
+    13 0000000C 6CD89D3B               d1 dd 1000200300
+    14 00000010 78CB72EE               d2 dd 4000500600
+    15 00000014 0000000000000000       qAns dq 0
+    16 0000001C 3BE5E0FE16000000       q1 dq 98765432123
+    17 00000024 3D1CDCDF02000000       q2 dq 12345678909
+    18 0000002C 000000000000000000-    dqAns ddq 0
+    19 0000002C 00000000000000     
+    20                                 
+    21                                 [section .text]
+    22                                 [global _start]
+    23                                 _start:
+    24 00000000 8A0425[00000000]        mov al, byte [b1]
+    25 00000007 F62425[00000000]        mul byte [b2]
+    26 0000000E 66890425[00000000]      mov word [wAns], ax
+    27                                 
+    28 00000016 668B0425[00000000]      mov ax, word [w1]
+    29 0000001E 66F72425[00000000]      mul word [w2]
+    30 00000026 66890425[00000000]      mov word [dAns], ax
+    31 0000002E 66891425[02000000]      mov word [dAns+2], dx
+    32                                 
+    33 00000036 8B0425[00000000]        mov eax, dword [d1]
+    34 0000003D F72425[00000000]        mul dword [d2]
+    35 00000044 890425[00000000]        mov dword [qAns], eax
+    36 0000004B 891425[04000000]        mov dword [qAns+4], edx
+    37                                 
+    38 00000052 488B0425[00000000]      mov rax, qword [q1]
+    39 0000005A 48F72425[00000000]      mul qword [q2]
+    40 00000062 48890425[00000000]      mov qword [dqAns], rax
+    41 0000006A 48891425[08000000]      mov qword [dqAns+8], rdx
+    42                                 
+    43                                 last:
+    44 00000072 48C7C03C000000          mov rax, SYS_EXIT
+    45 00000079 48C7C700000000          mov rdi, EXIT_SUCCESS
+    46 00000080 0F05                    syscall

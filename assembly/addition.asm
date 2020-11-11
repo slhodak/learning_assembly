@@ -9,8 +9,8 @@ b2              db    3
 b3              db    5
 b4              db    7
 
-test_neg        db    -8 ; 1001000 ?
-test_neg2       db    150 ; x/ub = 150, x/db = -105 (prediction)
+test_neg        db    -8
+test_neg2       db    100
 
 b5              db    10
 b6              db    -8
@@ -48,9 +48,15 @@ _start:
   add       al, byte [b4]
   ; al = 15
 
+  mov       cl, byte [test_neg]
+  add       cl, byte [test_neg2]
+  ; cl = 142 no, -114
+  ; problem is 150 is unsigned. treating as if it's signed yields unexpected results.
+  ; what if 150 were signed? 
   mov       bl, byte [b5]
   add       bl, byte [b6]
-  ; bl = ?
+  ; bl = 2 yes
+
   ; bAns = bNum1 + bNum2
   mov       al, byte [bNum1]
   add       al, byte [bNum2] ; type spec can be omitted, not good practice

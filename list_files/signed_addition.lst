@@ -1,0 +1,25 @@
+     1                                 %line 1+1 assembly/signed_addition.asm
+     2                                 [section .data]
+     3                                 
+     4                                 SYS_EXIT equ 60
+     5                                 EXIT_SUCCESS equ 0
+     6                                 
+     7 00000000 E7                     b1 db -25
+     8 00000001 CE                     b2 db -50
+     9                                 
+    10 00000002 32                     b3 db 50
+    11 00000003 9C                     b4 db -100
+    12                                 
+    13                                 [section .text]
+    14                                 [global _start]
+    15                                 _start:
+    16                                 
+    17 00000000 8A0425[00000000]        mov al, byte [b1]
+    18 00000007 020425[00000000]        add al, byte [b2]
+    19 0000000E 020425[00000000]        add al, byte [b3]
+    20 00000015 020425[00000000]        add al, byte [b4]
+    21                                 
+    22                                 last:
+    23 0000001C 48C7C03C000000          mov rax, SYS_EXIT
+    24 00000023 48C7C700000000          mov rdi, EXIT_SUCCESS
+    25 0000002A 0F05                    syscall

@@ -11,7 +11,7 @@
     11 00000003 07                     b4 db 7
     12                                 
     13 00000004 F8                     test_neg db -8
-    14 00000005 96                     test_neg2 db 150
+    14 00000005 64                     test_neg2 db 100
     15                                 
     16 00000006 0A                     b5 db 10
     17 00000007 F8                     b6 db -8
@@ -52,42 +52,47 @@
     52 00000015 020425[00000000]        add al, byte [b4]
     53                                 
     54                                 
-    55 0000001C 8A1C25[00000000]        mov bl, byte [b5]
-    56 00000023 021C25[00000000]        add bl, byte [b6]
+    55 0000001C 8A0C25[00000000]        mov cl, byte [test_neg]
+    56 00000023 020C25[00000000]        add cl, byte [test_neg2]
     57                                 
     58                                 
-    59 0000002A 8A0425[00000000]        mov al, byte [bNum1]
-    60 00000031 020425[00000000]        add al, byte [bNum2]
-    61 00000038 880425[00000000]        mov byte [bAns], al
+    59                                 
+    60 0000002A 8A1C25[00000000]        mov bl, byte [b5]
+    61 00000031 021C25[00000000]        add bl, byte [b6]
     62                                 
-    63 0000003F 668B0425[00000000]      mov ax, word [wNum1]
-    64 00000047 66030425[00000000]      add ax, word [wNum2]
-    65 0000004F 66890425[00000000]      mov word [wNum1], ax
-    66                                 
-    67 00000057 8B0425[00000000]        mov eax, dWord [dNum1]
-    68 0000005E 030425[00000000]        add eax, dWord [dNum2]
-    69 00000065 890425[00000000]        mov dWord [dAns], eax
-    70                                 
-    71 0000006C 488B0425[00000000]      mov rax, qWord [qNum1]
-    72 00000074 48030425[00000000]      add rax, qWord [qNum2]
-    73 0000007C 48890425[00000000]      mov qWord [qAns], rax
-    74                                 
-    75 00000084 FEC0                    inc al
-    76 00000086 66FFC0                  inc ax
-    77 00000089 FF0425[00000000]        inc dWord [dAns]
-    78 00000090 48FF0425[00000000]      inc qWord [qAns]
-    79 00000098 48810425[00000000]-     add qWord [qAns], 300
-    80 00000098 2C010000           
-    81                                 
-    82 000000A4 488B0425[00000000]      mov rax, qWord [dquad1]
-    83 000000AC 488B1425[08000000]      mov rdx, qWord [dquad1+8]
-    84 000000B4 48030425[00000000]      add rax, qWord [dquad2]
-    85 000000BC 48131425[08000000]      adc rdx, qWord [dquad2+8]
-    86 000000C4 48890425[00000000]      mov qword [dqSum], rax
-    87 000000CC 48891425[08000000]      mov qword [dqSum+8], rdx
-    88                                 
-    89                                 
-    90                                 last:
-    91 000000D4 48C7C03C000000          mov rax, SYS_EXIT
-    92 000000DB 48C7C700000000          mov rdi, EXIT_SUCCESS
-    93 000000E2 0F05                    syscall
+    63                                 
+    64                                 
+    65 00000038 8A0425[00000000]        mov al, byte [bNum1]
+    66 0000003F 020425[00000000]        add al, byte [bNum2]
+    67 00000046 880425[00000000]        mov byte [bAns], al
+    68                                 
+    69 0000004D 668B0425[00000000]      mov ax, word [wNum1]
+    70 00000055 66030425[00000000]      add ax, word [wNum2]
+    71 0000005D 66890425[00000000]      mov word [wNum1], ax
+    72                                 
+    73 00000065 8B0425[00000000]        mov eax, dWord [dNum1]
+    74 0000006C 030425[00000000]        add eax, dWord [dNum2]
+    75 00000073 890425[00000000]        mov dWord [dAns], eax
+    76                                 
+    77 0000007A 488B0425[00000000]      mov rax, qWord [qNum1]
+    78 00000082 48030425[00000000]      add rax, qWord [qNum2]
+    79 0000008A 48890425[00000000]      mov qWord [qAns], rax
+    80                                 
+    81 00000092 FEC0                    inc al
+    82 00000094 66FFC0                  inc ax
+    83 00000097 FF0425[00000000]        inc dWord [dAns]
+    84 0000009E 48FF0425[00000000]      inc qWord [qAns]
+    85 000000A6 48810425[00000000]-     add qWord [qAns], 300
+    86 000000A6 2C010000           
+    87                                 
+    88 000000B2 488B0425[00000000]      mov rax, qWord [dquad1]
+    89 000000BA 488B1425[08000000]      mov rdx, qWord [dquad1+8]
+    90 000000C2 48030425[00000000]      add rax, qWord [dquad2]
+    91 000000CA 48131425[08000000]      adc rdx, qWord [dquad2+8]
+    92 000000D2 48890425[00000000]      mov qword [dqSum], rax
+    93 000000DA 48891425[08000000]      mov qword [dqSum+8], rdx
+    94                                 
+    95                                 last:
+    96 000000E2 48C7C03C000000          mov rax, SYS_EXIT
+    97 000000E9 48C7C700000000          mov rdi, EXIT_SUCCESS
+    98 000000F0 0F05                    syscall
