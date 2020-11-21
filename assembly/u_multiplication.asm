@@ -16,7 +16,6 @@ q1              dq    98765432123
 q2              dq    12345678909
 dqAns           ddq   0 ; 1,219,326,312,299,192,193,807
                       ; = 0x42 198d 44c4 b85d 130f
-                      ; that's cray
 section     .text
 global _start
 _start:

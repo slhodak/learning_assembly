@@ -27,3 +27,13 @@ Is an OS kernel written for a specific microarchitecture or instruction set?
   Must be specific to an instruction set.
 
 Mach-O
+
+
+How expensive (# of operations) to end and start a new while loop?
+Compared to doing a boolean comparison at the start of each iteration?
+  Like once Part A is done and the compar. will always == false, j = i and
+    new loop while j < max?
+    How many comparisons until it's worth it to start a separate while loop
+    that doesn't include them?
+      Measured in memory and operations
+
