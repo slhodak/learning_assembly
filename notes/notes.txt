@@ -750,6 +750,14 @@ allows quadword to have double-quadword result in adx and rdx registers
 
 imul - signed
 
+Division
+
+divisor cannot be an immediate
+  obviously divided also cannot be
+for signed division, the upper-order portion must be sign-extended
+for unsigned division, the upper-order portion must be 0
+
+
 Logical Instructions
 
 

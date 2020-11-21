@@ -1,0 +1,51 @@
+     1                                 %line 1+1 assembly/int_division.asm
+     2                                 [section .data]
+     3                                 
+     4                                 SYS_EXIT equ 60
+     5                                 EXIT_SUCCESS equ 0
+     6                                 
+     7 00000000 3F                     b1 db 63
+     8 00000001 11                     b2 db 17
+     9 00000002 05                     b3 db 5
+    10 00000003 00                     bAns1 db 0
+    11 00000004 00                     bAns2 db 0
+    12 00000005 00                     bRem2 db 0
+    13 00000006 00                     bAns3 db 0
+    14                                 
+    15 00000007 E110                   w1 dw 4321
+    16 00000009 D204                   w2 dw 1234
+    17 0000000B A700                   w3 dw 167
+    18 0000000D 0000                   wAns1 dw 0
+    19 0000000F 0000                   wAns2 dw 0
+    20 00000011 0000                   wRem2 dw 0
+    21 00000013 0000                   wAns3 dw 0
+    22                                 
+    23                                 [section .text]
+    24                                 [global _start]
+    25                                 _start:
+    26                                 
+    27                                 
+    28                                 
+    29 00000000 8A0425[00000000]        mov al, byte [b1]
+    30 00000007 B400                    mov ah, 0
+    31 00000009 B303                    mov bl, 3
+    32 0000000B F6F3                    div bl
+    33 0000000D 880425[00000000]        mov byte [bAns1], al
+    34                                 
+    35 00000014 8A0425[00000000]        mov al, byte [b1]
+    36 0000001B B400                    mov ah, 0
+    37 0000001D 8A1C25[00000000]        mov bl, byte [b2]
+    38 00000024 F6F3                    div bl
+    39 00000026 880425[00000000]        mov byte [bAns2], al
+    40                                 
+    41 0000002D 882425[00000000]        mov byte [bRem2], ah
+    42                                 
+    43 00000034 8A0425[00000000]        mov al, byte [b1]
+    44 0000003B F62425[00000000]        mul byte [b3]
+    45 00000042 F63425[00000000]        div byte [b2]
+    46 00000049 880425[00000000]        mov byte [bAns3], al
+    47                                 
+    48                                 last:
+    49 00000050 48C7C03C000000          mov rax, SYS_EXIT
+    50 00000057 48C7C700000000          mov rdi, EXIT_SUCCESS
+    51 0000005E 0F05                    syscall
